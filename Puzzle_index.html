@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Puzzle Vault</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:0; }
+    header { background:#333; color:#fff; text-align:center; padding:20px; }
+    nav { background:#444; text-align:center; padding:10px; }
+    nav a { color:#fff; margin:0 15px; text-decoration:none; }
+    .container { max-width:900px; margin:20px auto; background:#fff; padding:20px; border-radius:8px; }
+    .puzzle-box { background:#fafafa; padding:15px; border:1px solid #ddd; border-radius:6px; }
+    input, button { padding:8px; margin-top:10px; }
+    .feedback { margin-top:10px; font-weight:bold; }
+    .correct { color:green; }
+    .wrong { color:red; }
+    .hint { margin-top:15px; font-style:italic; color:#555; }
+    footer { background:#333; color:#fff; text-align:center; padding:20px; margin-top:30px; }
+    section { margin-top:30px; }
+    #progressBar { height:12px; background:#ddd; border-radius:6px; margin-top:10px; }
+    #progressFill { height:100%; background:#4caf50; border-radius:6px; width:0%; transition:width 0.4s; }
+    #puzzleCounter { font-size:0.9em; color:#888; margin-top:5px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🧩 Puzzle Vault</h1>
+    <p>Daily Brain Teasers & Logic Challenges</p>
+  </header>
+
+  <nav>
+    <a href="#daily">Daily Puzzle</a>
+    <a href="#streak">My Streak</a>
+    <a href="#about">About</a>
+    <a href="#tips">Tips</a>
+    <a href="#contact">Contact</a>
+  </nav>
+
+  <div class="container">
+    <section id="daily">
+      <h2>Today's Puzzle</h2>
+      <div class="puzzle-box">
+        <div id="puzzleCounter">Puzzle 1 of 30</div>
+        <div id="progressBar"><div id="progressFill"></div></div>
+        <p id="riddleText"></p>
+        <input type="text" id="answer" placeholder="Enter your answer">
+        <button onclick="checkAnswer()">Submit</button>
+        <div id="feedback" class="feedback"></div>
+        <div class="hint">
+          Hint Points: <span id="hintPoints">0</span>
+          | Next hint in: <span id="timer">30</span> seconds
+        </div>
+        <button onclick="useHint()">Use Hint (cost: 2 points)</button>
+        <button onclick="showAnswer()">Show Answer (cost: 5 points)</button>
+        <div id="hintText"></div>
+      </div>
+    </section>
+
+    <section id="streak">
+      <h2>My Streak</h2>
+      <p id="streakCount">🔥 You've solved puzzles for <strong>0</strong> in a row!</p>
+    </section>
+
+    <section id="about">
+      <h2>About Puzzle Vault</h2>
+      <p>Puzzle Vault is your daily destination for brain teasers, riddles, and logic challenges.
+      Build your streak, earn hint points, and sharpen your mind with 30 unique puzzles!</p>
+    </section>
+
+    <section id="tips">
+      <h2>Tips for Success</h2>
+      <ul>
+        <li>Think outside the box — riddles often use wordplay.</li>
+        <li>Save hint points for harder puzzles.</li>
+        <li>You earn 1 hint point every 30 seconds automatically.</li>
+        <li>Challenge friends and compare streaks.</li>
+      </ul>
+    </section>
+
+    <section id="contact">
+      <h2>Contact Us</h2>
+      <p>Have feedback or puzzle ideas? Reach out at <strong>support@puzzlevault.com</strong>.</p>
+    </section>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Puzzle Vault | Built for puzzle lovers</p>
+  </footer>
+
+  <script>
+    const riddles = [
+      { question: "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", answers: ["echo"], hint: "It repeats what you say." },
+      { question: "The more of me you take, the more you leave behind. What am I?", answers: ["footsteps"], hint: "You make these when walking." },
+      { question: "I'm always in front of you but can't be seen. What am I?", answers: ["future"], hint: "It hasn't happened yet." },
+      { question: "What has to be broken before you can use it?", answers: ["egg"], hint: "Breakfast ingredient." },
+      { question: "What has keys but can't open locks?", answers: ["piano"], hint: "A musical instrument." },
+      { question: "What starts with an E, ends with an E, but only contains one letter?", answers: ["envelope"], hint: "You put mail inside it." },
+      { question: "What is always coming but never arrives?", answers: ["tomorrow"], hint: "The day after today." },
+      { question: "What has a head, a tail, but no body?", answers: ["coin"], hint: "You use it to pay for things." },
+      { question: "What is black and white and read all over?", answers: ["newspaper"], hint: "People read it in the morning." },
+      { question: "I have hands but cannot clap. What am I?", answers: ["clock"], hint: "It tells you the time." },
+      { question: "What gets wetter the more it dries?", answers: ["towel"], hint: "You use it after a shower." },
+      { question: "What can travel around the world while staying in a corner?", answers: ["stamp"], hint: "Found on an envelope." },
+      { question: "I have cities, but no houses live there. I have mountains, but no trees grow there. I have water, but no fish swim there. What am I?", answers: ["map"], hint: "Used for navigation." },
+      { question: "What has one eye but cannot see?", answers: ["needle"], hint: "Used for sewing." },
+      { question: "What can you catch but not throw?", answers: ["cold"], hint: "Comes with sneezing." },
+      { question: "I'm light as a feather, but even the strongest person can't hold me for more than a few minutes. What am I?", answers: ["breath"], hint: "You need it to live." },
+      { question: "What has many teeth but cannot bite?", answers: ["comb"], hint: "Used to style hair." },
+      { question: "What invention lets you look right through a wall?", answers: ["window"], hint: "Found in every room." },
+      { question: "What word is spelled incorrectly in every dictionary?", answers: ["incorrectly"], hint: "Think about the question carefully." },
+      { question: "I go up but never come down. What am I?", answers: ["age"], hint: "You celebrate it each year." },
+      { question: "What has four legs in the morning, two legs at noon, and three legs in the evening?", answers: ["human", "man", "person"], hint: "The riddle of the Sphinx." },
+      { question: "What runs but never walks, has a mouth but never talks?", answers: ["river"], hint: "Found in nature, flows to the sea." },
+      { question: "What can fill a room but takes up no space?", answers: ["light"], hint: "Turn on a switch to get it." },
+      { question: "I have branches but no fruit, trunk, or leaves. What am I?", answers: ["bank"], hint: "You keep money here." },
+      { question: "What is so fragile that saying its name breaks it?", answers: ["silence"], hint: "The absence of sound." },
+      { question: "What building has the most stories?", answers: ["library"], hint: "Full of books." },
+      { question: "What can you hold in your left hand but not in your right?", answers: ["right hand", "your right hand"], hint: "Think about your own body." },
+      { question: "What has a neck but no head?", answers: ["bottle"], hint: "You drink from it." },
+      { question: "What comes once in a minute, twice in a moment, but never in a thousand years?", answers: ["m", "the letter m"], hint: "Look at the words in the riddle." },
+      { question: "I have no life but I can die. What am I?", answers: ["battery"], hint: "Powers your devices." }
+    ];
+
+    let currentIndex = 0;
+    let streak = 0;
+    let hintPoints = 0;
+    let timer = 30;
+
+    function updateDisplay() {
+      document.getElementById("riddleText").textContent = riddles[currentIndex].question;
+      document.getElementById("puzzleCounter").textContent = `Puzzle ${currentIndex + 1} of ${riddles.length}`;
+      document.getElementById("progressFill").style.width = ((currentIndex / riddles.length) * 100) + "%";
+    }
+
+    updateDisplay();
+
+    function checkAnswer() {
+      const userAnswer = document.getElementById("answer").value.trim().toLowerCase();
+      const feedback = document.getElementById("feedback");
+      const correctAnswers = riddles[currentIndex].answers;
+
+      if (correctAnswers.includes(userAnswer)) {
+        feedback.textContent = "Correct! 🎉 Moving to next puzzle...";
+        feedback.className = "feedback correct";
+        streak++;
+
+        setTimeout(() => {
+          currentIndex++;
+          if (currentIndex < riddles.length) {
+            updateDisplay();
+            document.getElementById("answer").value = "";
+            feedback.textContent = "";
+            document.getElementById("hintText").textContent = "";
+          } else {
+            document.getElementById("riddleText").textContent = "🎉 You've completed all 30 puzzles! You're a Puzzle Vault champion!";
+            document.getElementById("answer").style.display = "none";
+            document.getElementById("progressFill").style.width = "100%";
+            document.getElementById("puzzleCounter").textContent = "All puzzles complete!";
+          }
+        }, 1500);
+
+        document.getElementById("streakCount").innerHTML =
+          `🔥 You've solved puzzles for <strong>${streak}</strong> in a row!`;
+
+      } else {
+        feedback.textContent = "Wrong answer ❌ Try again!";
+        feedback.className = "feedback wrong";
+      }
+    }
+
+    function useHint() {
+      if (hintPoints >= 2) {
+        hintPoints -= 2;
+        document.getElementById("hintPoints").textContent = hintPoints;
+        document.getElementById("hintText").textContent = "💡 Hint: " + riddles[currentIndex].hint;
+      } else {
+        document.getElementById("hintText").textContent = "Not enough hint points!";
+      }
+    }
+
+    function showAnswer() {
+      if (hintPoints >= 5) {
+        hintPoints -= 5;
+        document.getElementById("hintPoints").textContent = hintPoints;
+        document.getElementById("hintText").textContent = "✅ Answer: " + riddles[currentIndex].answers[0];
+      } else {
+        document.getElementById("hintText").textContent = "Not enough hint points to reveal the answer!";
+      }
+    }
+
+    // Allow Enter key to submit
+    document.getElementById("answer").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") checkAnswer();
+    });
+
+    setInterval(() => {
+      timer--;
+      document.getElementById("timer").textContent = timer;
+      if (timer <= 0) {
+        hintPoints += 1;
+        document.getElementById("hintPoints").textContent = hintPoints;
+        timer = 30;
+      }
+    }, 1000);
+  pnpm i @vercel/analytics
+  import type { AppProps } from 'next/app';
+import { Analytics } from '@vercel/analytics/next';
+ 
+function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <>
+      <Component {...pageProps} />
+      <Analytics />
+    </>
+  );
+}
+ 
+export default MyApp;
+  </script>
+</body>
+</html>
